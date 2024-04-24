@@ -119,7 +119,7 @@
 /* eslint-disable prettier/prettier */
 /* eslint-disable react-hooks/exhaustive-deps */
 import React, {useEffect, useState} from 'react';
-import {StyleSheet, View} from 'react-native';
+import {StyleSheet, View } from 'react-native';
 import Alarm, {removeAlarm, scheduleAlarm, updateAlarm} from '../alarm';
 import TextInput from '../components/TextInput';
 import DayPicker from '../components/DayPicker';
@@ -127,14 +127,20 @@ import TimePicker from '../components/TimePicker';
 import Button from '../components/Button';
 import {globalStyles} from '../global';
 import SwitcherInput from '../components/SwitcherInput';
+import { soundURIs } from '../raw/soundURIs' ;
+import Select from 'react-native-picker-select';
+import DatePicker from '../components/DatePicker';
 
 export default function ({route, navigation}) {
   const [alarm, setAlarm] = useState(null);
   const [mode, setMode] = useState(null);
+  const [selectedValue, setSelectedValue] = useState(Object.keys(soundURIs)[0]);
 
   useEffect(() => {
     if (route.params && route.params.alarm) {
-      setAlarm(new Alarm(route.params.alarm));
+      const newAlarm = new Alarm(route.params.alarm);
+      setSelectedValue(newAlarm.soundName);
+      setAlarm(newAlarm);
       setMode('EDIT');
     } else {
       setAlarm(new Alarm());
@@ -169,7 +175,6 @@ export default function ({route, navigation}) {
   if (!alarm) {
     return <View />;
   }
-
   return (
     <View style={globalStyles.container}>
       <View style={[globalStyles.innerContainer, styles.container]}>
@@ -196,6 +201,20 @@ export default function ({route, navigation}) {
             onChangeText={v => update([['description', v]])}
             value={alarm.description}
           />
+            <DatePicker 
+              onChange={v => update([['dates', v]])}
+              activeDates={alarm.dates}
+            />
+
+          <Select
+                 onValueChange={(value) => {
+                  update([['soundName', value]])
+                 }}
+                 placeholder={{}}
+                 value={selectedValue}
+                 items={Object.keys(soundURIs).map((key) => ({label: key,value: key,}))}
+             />
+
           <SwitcherInput
             description={'Repeat'}
             value={alarm.repeating}

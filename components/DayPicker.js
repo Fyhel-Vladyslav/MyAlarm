@@ -4,7 +4,6 @@ import React, {useState} from 'react';
 import {colors} from '../global';
 
 export default function ({activeDays = [], onChange = () => null}) {
-  // NOTICE: days doesn't change if prop activeDays changes
   const [days, setDays] = useState(activeDays);
 
   function onDayChange(dayIndex) {

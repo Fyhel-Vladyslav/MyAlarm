@@ -1,6 +1,5 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
-//import {Alarm} from "../alarm";
-
+import { todayString } from "react-native-calendars/src/expandableCalendar/commons";
 
 export default class AlarmService {
   constructor() {
@@ -40,14 +39,6 @@ export default class AlarmService {
       if (jsonAlarms !== null) {
         const activeAlarm = jsonAlarms.find(element => element.active === true);
         if (activeAlarm) {
-          if(activeAlarm.repeating)
-          {
-            const today = new Date().getDay();
-            console.log(today, activeAlarm.days);
-            if(activeAlarm.days.find(el => el == today ))
-              return activeAlarm.uid
-          }
-          else
           return activeAlarm.uid
         }
       };
@@ -74,12 +65,43 @@ export default class AlarmService {
       existingAlarms = await this.getAll();
       const hour = new Date().getHours();
       const minutes = new Date().getMinutes();
-
+      let isChanged = false;
       existingAlarms.forEach(element => {
         if(element.enabled === true)
-          if(element.hour == hour && element.minutes == minutes)
+        if(element.hour == hour && element.minutes == minutes)
+        {
+          if(element.dates!={} || element.repeating)
+          {
+          if(element.repeating)
+          {
+            today = new Date().getDay();
+            today = today===6?0:today+1;
+            if(element.days.includes(today ))
+            {
               element.active = true;
-            })
+              isChanged = true;
+            }
+          }
+          if(element.dates!={})
+          {
+            const date = new Date();
+            const today = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`; 
+            
+            if ( Object.keys(element.dates).some(date => date.includes(today)))  
+            {
+              element.active = true;
+              isChanged = true;
+            }
+          }
+        }
+          else
+          {
+            element.active = true;
+            isChanged = true;
+          }
+       }
+      })
+      if(isChanged)
             await AsyncStorage.setItem('alarms', JSON.stringify(existingAlarms));
           
     } catch (error) {
@@ -92,13 +114,9 @@ export default class AlarmService {
     try {
       const existingAlarmsString = await AsyncStorage.getItem('alarms');
       const existingAlarms = existingAlarmsString ? JSON.parse(existingAlarmsString) : {};
-      
       if (existingAlarms !== null) {
-        existingAlarms.forEach(element => {
-          if(element.uid == uid)
-            return element;
-        })
-      };
+        return existingAlarms.find(p=>p.uid==uid);
+        }
     } catch (error) {
       console.error('Error loading alarms: ', error);
       return null; 
@@ -125,10 +143,8 @@ export default class AlarmService {
       const existingAlarmsString = await AsyncStorage.getItem('alarms');
       const existingAlarms = existingAlarmsString ? JSON.parse(existingAlarmsString) : {};
       
-      // Convert the alarms object into an array
       const alarmsArray = Object.values(existingAlarms);
       const index = alarmsArray.findIndex(p => p.uid === alarm.uid);
-
     if (index !== -1) {
       alarmsArray[index] = alarm;
       await AsyncStorage.setItem('alarms', JSON.stringify(alarmsArray));
@@ -185,12 +201,25 @@ export default class AlarmService {
   //     days: toAndroidDays(this.days),
   //   };
   // }
-
+  async continueA() {
+    try {
+      alarmsArray = await this.getAll();
+      const index = alarmsArray.findIndex(p => p.active === true);
+      if (index !== -1) {
+        alarmsArray[index].active = false;
+        await AsyncStorage.setItem('alarms', JSON.stringify(alarmsArray));
+      } else {
+        console.error('Alarm not found for update.');
+      }
+    } catch (error) {
+      console.error('Error loading alarms: ', error);
+      return null; 
+    }
+  }
   async stop() {
     try {
       alarmsArray = await this.getAll();
       const index = alarmsArray.findIndex(p => p.active === true);
-console.log(alarmsArray);
       if (index !== -1) {
         alarmsArray[index].active = false;
         alarmsArray[index].enabled = false;
@@ -211,7 +240,13 @@ console.log(alarmsArray);
 
       if (index !== -1) {
         alarmsArray[index].active = false;
-        alarmsArray[index].minutes =  alarmsArray[index].minutes >54?(alarmsArray[index].minutes -55): alarmsArray[index].minutes+5;
+        if(alarmsArray[index].minutes >54)
+        {
+        alarmsArray[index].hours = alarmsArray[index].hours==23?0:alarmsArray[index].hours;
+        alarmsArray[index].minutes =(alarmsArray[index].minutes -55);
+        }
+        else
+        alarmsArray[index].minutes =  alarmsArray[index].minutes+5;
         await AsyncStorage.setItem('alarms', JSON.stringify(alarmsArray));
       } else {
         console.error('Alarm not found for update.');

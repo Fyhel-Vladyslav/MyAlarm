@@ -1,23 +1,44 @@
 /* eslint-disable prettier/prettier */
 /* eslint-disable react-hooks/exhaustive-deps */
 import React, {useEffect, useState} from 'react';
-import {StyleSheet, Text, View} from 'react-native';
-import {getAlarm, snoozeAlarm, stopAlarm} from '../alarm';
+import {StyleSheet, Text, View } from 'react-native';
+import {getAlarm, snoozeAlarm, stopAlarm, continueAlarm} from '../alarm';
 import Button from '../components/Button';
 import {colors, globalStyles} from '../global';
-
+import { Audio } from 'expo-av';
+import { soundURIs } from '../raw/soundURIs' 
 export default function ({route, navigation}) {
   const [alarm, setAlarm] = useState(null);
-
+  const [soundObject, setSoundObject] = useState(null);
+   
   useEffect(() => {
     const alarmUid = route.params.alarmUid;
-    (async function () {
+    async function fetchAlarm() {
       const myAlarm = await getAlarm(alarmUid);
-      myAlarm.minutes-=1;
+      //myAlarm.minutes = myAlarm.minutes==0?59:myAlarm.minutes-1;
       setAlarm(myAlarm);
-    })();
+      playSound(myAlarm);
+    }
+    fetchAlarm();
   }, []);
 
+  async function playSound(myAlarm) {
+    let soundName = Object.keys(soundURIs)[0];
+    if (myAlarm !== null && myAlarm.soundName) {
+      soundName = myAlarm.soundName;
+    }
+    const { sound } = await Audio.Sound.createAsync(soundURIs[soundName]);
+    setSoundObject(sound);
+    await sound.playAsync();
+  }
+
+  useEffect(() => {
+    return () => {
+      if (soundObject) {
+        soundObject.unloadAsync();
+      }
+    };
+  }, [soundObject]);
   if (!alarm) {
     return <View />;
   }
@@ -46,6 +67,15 @@ export default function ({route, navigation}) {
               navigation.goBack();
             }}
           />
+       {Object.keys(alarm.dates).length !== 0 || alarm.repeating ? (
+    <Button
+      title={'Continue'}
+      onPress={async () => {
+        await continueAlarm();
+        navigation.goBack();
+      }}
+    />
+  ) : null}
         </View>
       </View>
     </View>

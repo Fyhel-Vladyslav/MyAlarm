@@ -32,6 +32,14 @@ export async function disableAlarm(uid) {
   }
 }
 
+export async function continueAlarm() {
+  try {
+    await _AlarmService.continueA();
+  } catch (e) {
+    console.log(e);
+  }
+}
+
 export async function stopAlarm() {
   try {
     await _AlarmService.stop();
@@ -113,6 +121,8 @@ export default class Alarm {
     this.repeating = getParam(params, 'repeating', false);
     this.active = getParam(params, 'active', false);
     this.days = this.repeating?getParam(params, 'days', []):[];
+    this.dates = getParam(params, 'dates', {});
+    this.soundName = getParam(params, 'soundName', 'sound1');
   }
 
   static getEmpty() {
