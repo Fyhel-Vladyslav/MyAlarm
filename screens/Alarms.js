@@ -13,7 +13,7 @@ export default function ({navigation}) {
   useEffect(() => {
     navigation.addListener('focus', async () => {
       setAlarms(await getAllAlarms());
-      setScheduler(setInterval(fetchState, 31000));
+      setScheduler(setInterval(fetchState, 10000));
     });
     navigation.addListener('blur', async () => {
       clearInterval(scheduler);

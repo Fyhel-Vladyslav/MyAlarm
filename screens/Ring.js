@@ -67,7 +67,6 @@ export default function ({route, navigation}) {
               navigation.goBack();
             }}
           />
-       {Object.keys(alarm.dates).length !== 0 || alarm.repeating ? (
     <Button
       title={'Continue'}
       onPress={async () => {
@@ -75,7 +74,6 @@ export default function ({route, navigation}) {
         navigation.goBack();
       }}
     />
-  ) : null}
         </View>
       </View>
     </View>

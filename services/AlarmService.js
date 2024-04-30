@@ -65,14 +65,16 @@ export default class AlarmService {
       existingAlarms = await this.getAll();
       const hour = new Date().getHours();
       const minutes = new Date().getMinutes();
+      const seconds = new Date().getSeconds();
       let isChanged = false;
       existingAlarms.forEach(element => {
         if(element.enabled === true)
-        if(element.hour == hour && element.minutes == minutes)
+
+        if(element.hour == hour && element.minutes == minutes&& seconds <4)
         {
-          if(element.dates!={} || element.repeating)
+          if(Object.keys(element.dates).length > 0 || element.repeating)
           {
-          if(element.repeating)
+          if(element.days.length>0)
           {
             today = new Date().getDay();
             today = today===6?0:today+1;
