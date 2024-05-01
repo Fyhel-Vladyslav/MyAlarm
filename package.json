@@ -26,6 +26,7 @@
     "expo-status-bar": "~1.11.1",
     "react": "18.2.0",
     "react-dom": "18.2.0",
+    "react-instantsearch-native": "^6.40.4",
     "react-native": "^0.73.6",
     "react-native-alarm-module": "^3.1.0",
     "react-native-calendars": "^1.1304.1",
@@ -33,10 +34,19 @@
     "react-native-get-random-values": "~1.8.0",
     "react-native-modal-datetime-picker": "^17.1.0",
     "react-native-picker-select": "^9.1.3",
-    "react-native-web": "~0.19.6"
+    "react-native-web": "~0.19.6",
+    "assemblyai": "file:./node_modules/assemblyai",
+    "undefined": "github:algoliasearch/lite",
+    "mic-recorder-to-mp3": "file:./node_modules/mic-recorder-to-mp3",
+    "react-native-audio-record": "file:./node_modules/react-native-audio-record",
+    "react-native-fs": "file:./node_modules/react-native-fs"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0"
   },
-  "private": true
+  "private": true,
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": ""
 }
